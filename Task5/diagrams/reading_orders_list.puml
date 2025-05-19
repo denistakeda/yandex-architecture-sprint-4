@@ -1,0 +1,14 @@
+@startuml reading orders list
+
+participant "API User" as User
+participant "MES API" as API
+participant "MES Cache" as Cache
+
+User -> API: Request list of orders
+API -> Cache: Get list of orders
+Cache -> API: Returns list of orders
+API -> User: Returns list of orders
+
+caption: Expected cache to be always fulfiled beforehand
+
+@enduml
