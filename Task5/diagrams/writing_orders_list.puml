@@ -1,0 +1,34 @@
+
+@startuml writing orders list
+
+participant Customer
+participant "Internet Shop" as Shop
+participant "Shop API" as ShopAPI
+participant "OrdersService" as OrdersService
+participant "Orders DB" as OrdersDB
+participant RabbitMQ
+participant "MES API" as MESAPI
+participant "MES Cache" as MesCache
+
+Customer -> Shop: Requests to create an order
+Shop -> ShopAPI: Requests to create an order
+ShopAPI -> OrdersService: Requests to create an order
+OrdersService -> OrdersDB: Insert an order
+OrdersDB -> OrdersService: SUCCESS
+
+par "Response flow"
+    OrdersService -> ShopAPI: SUCCESS
+    ShopAPI -> Shop: SUCCESS
+    Shop -> Customer: The order was successfully created
+end
+
+par "Cache update flow"
+    OrdersService -> RabbitMQ: Order's status was updated
+    RabbitMQ --> MESAPI: Notify about the event
+    MESAPI -> OrdersService: Requests the relevant list of orders
+    OrdersService -> MESAPI: Relevant list of orders
+    MESAPI -> MesCache: Update the relevant list of orders
+    MesCache -> MesCache: Updated 
+end
+
+@enduml
